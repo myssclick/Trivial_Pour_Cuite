@@ -1,5 +1,7 @@
 // ── Initialisation ───────────────────────────────────────────────────────────
 UI.init();
+I18n.set(I18n.lang); // applique la langue sauvegardée
+mountLangPicker();
 UI.showSetup();
 
 let selectedCount = 2;
@@ -34,15 +36,13 @@ document.getElementById('app').addEventListener('click', e => {
 function handleSetCount(count) {
   selectedCount = count;
 
-  // Met à jour le bouton actif
   document.querySelectorAll('.count-btn').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.value) === count);
   });
 
-  // Recrée les champs de noms
   const container = document.getElementById('player-inputs');
   container.innerHTML = Array.from({ length: count }, (_, i) => `
-    <input class="player-input" placeholder="Joueur ${i + 1}" data-player="${i + 1}" maxlength="16" autocomplete="off" />
+    <input class="player-input" placeholder="${I18n.t('playerPlaceholder')} ${i + 1}" data-player="${i + 1}" maxlength="16" autocomplete="off" />
   `).join('');
 }
 
@@ -89,6 +89,62 @@ function handleBank() {
   UI.showBank(amount);
 }
 
+// ── Sélecteur de langue ───────────────────────────────────────────────────────
+function mountLangPicker() {
+  const picker = document.createElement('div');
+  picker.id = 'lang-picker';
+  picker.innerHTML = `
+    <button id="lang-toggle" title="Change language" aria-label="Change language">
+      ${I18n.flag()}
+    </button>
+    <div id="lang-dropdown" class="lang-dropdown" hidden>
+      <button class="lang-option" data-lang="fr">🇫🇷 Français</button>
+      <button class="lang-option" data-lang="en">🇬🇧 English</button>
+      <button class="lang-option" data-lang="es">🇪🇸 Español</button>
+    </div>
+  `;
+  document.body.appendChild(picker);
+
+  const toggle   = document.getElementById('lang-toggle');
+  const dropdown = document.getElementById('lang-dropdown');
+
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = !dropdown.hidden;
+    dropdown.hidden = isOpen;
+    toggle.classList.toggle('open', !isOpen);
+  });
+
+  document.addEventListener('click', () => {
+    dropdown.hidden = true;
+    toggle.classList.remove('open');
+  });
+
+  dropdown.addEventListener('click', e => {
+    const btn = e.target.closest('[data-lang]');
+    if (!btn) return;
+    e.stopPropagation();
+
+    I18n.set(btn.dataset.lang);
+    toggle.textContent = I18n.flag();
+    dropdown.hidden = true;
+    toggle.classList.remove('open');
+
+    // Marque la langue active
+    document.querySelectorAll('.lang-option').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === I18n.lang);
+    });
+
+    // Re-rend l'écran courant dans la nouvelle langue
+    UI.rerender();
+  });
+
+  // Marque la langue initiale active
+  document.querySelectorAll('.lang-option').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === I18n.lang);
+  });
+}
+
 // ── Utilitaires ───────────────────────────────────────────────────────────────
 function shakeElement(el) {
   el.animate(
@@ -103,7 +159,6 @@ function shakeElement(el) {
   );
 }
 
-// Retire la classe d'erreur dès que l'utilisateur tape dans un champ
 document.getElementById('app').addEventListener('input', e => {
   if (e.target.classList.contains('player-input')) {
     e.target.classList.remove('input-error');

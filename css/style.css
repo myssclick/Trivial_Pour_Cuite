@@ -397,6 +397,69 @@ h2 {
 
 .btn-menu:hover { opacity: 1; }
 
+/* ── Sélecteur de langue ───────────────────────────────────────────────────── */
+#lang-picker {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 300;
+}
+
+#lang-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--card-border);
+  background: var(--card-bg);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s, transform .15s;
+  line-height: 1;
+}
+
+#lang-toggle:hover        { border-color: var(--purple-light); }
+#lang-toggle.open         { border-color: var(--purple); transform: scale(1.08); }
+
+.lang-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 140px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.5);
+  animation: fadeUp .18s ease both;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  width: 100%;
+  padding: .65rem 1rem;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: .95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .12s;
+  text-align: left;
+}
+
+.lang-option:hover  { background: rgba(255,255,255,.06); }
+.lang-option.active { color: var(--purple-light); }
+.lang-option.active::after {
+  content: '✓';
+  margin-left: auto;
+  font-size: .8rem;
+}
+
 /* ── Modal de confirmation ─────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;

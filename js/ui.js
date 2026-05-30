@@ -1,5 +1,7 @@
 const UI = {
   app: null,
+  _screen: null,
+  _screenArg: null,
 
   init() {
     this.app = document.getElementById('app');
@@ -9,17 +11,38 @@ const UI = {
     this.app.innerHTML = `<div class="screen">${html}</div>`;
   },
 
+  // Mémorise l'écran courant pour pouvoir le re-rendre après un changement de langue
+  _track(name, arg) {
+    this._screen = name;
+    this._screenArg = arg ?? null;
+  },
+
+  rerender() {
+    switch (this._screen) {
+      case 'setup':      this.showSetup();                      break;
+      case 'turn':       this.showPlayerTurn();                 break;
+      case 'difficulty': this.showDifficulty();                 break;
+      case 'question':   this.showQuestion(this._screenArg);   break;
+      case 'decision':   this.showDecision(this._screenArg);   break;
+      case 'drink':      this.showDrink(this._screenArg);      break;
+      case 'bank':       this.showBank(this._screenArg);       break;
+      case 'scores':     this.showScores();                    break;
+    }
+  },
+
   // ── Écran 1 : Configuration ──────────────────────────────────────────────
   showSetup() {
+    this._track('setup');
+    const t = k => I18n.t(k);
     this.render(`
       <div class="logo-area">
         <div class="logo">🍺</div>
         <h1>Trivial<br>pour Cuite</h1>
-        <p class="tagline">Le jeu de soirée sans filtre</p>
+        <p class="tagline">${t('tagline')}</p>
       </div>
 
       <div class="form-section">
-        <div class="form-label">Nombre de joueurs</div>
+        <div class="form-label">${t('playerCountLabel')}</div>
         <div class="player-count-row">
           ${[2, 3, 4, 5, 6, 7, 8].map(n =>
             `<button class="count-btn ${n === 2 ? 'active' : ''}" data-action="set-count" data-value="${n}">${n}</button>`
@@ -28,30 +51,32 @@ const UI = {
 
         <div id="player-inputs">
           ${[1, 2].map(i => `
-            <input class="player-input" placeholder="Joueur ${i}" data-player="${i}" maxlength="16" autocomplete="off" />
+            <input class="player-input" placeholder="${t('playerPlaceholder')} ${i}" data-player="${i}" maxlength="16" autocomplete="off" />
           `).join('')}
         </div>
 
-        <button class="btn btn-primary" data-action="start">C'est parti ! 🎉</button>
+        <button class="btn btn-primary" data-action="start">${t('startBtn')}</button>
       </div>
     `);
   },
 
   // ── Écran 2 : Tour du joueur ─────────────────────────────────────────────
   showPlayerTurn() {
+    this._track('turn');
+    const t = k => I18n.t(k);
     const player = Game.getCurrentPlayer();
     this.render(`
       <div class="turn-screen">
-        <p class="turn-label">C'est le tour de</p>
+        <p class="turn-label">${t('turnLabel')}</p>
         <div class="turn-player-name">${this._escape(player.name)}</div>
         <button class="btn btn-primary btn-large" data-action="draw">
-          🎲 Tirer une carte
+          ${t('drawBtn')}
         </button>
         <button class="btn btn-ghost" data-action="show-scores">
-          📊 Tableau des scores
+          ${t('scoresBtn')}
         </button>
         <button class="btn btn-ghost btn-menu" data-action="back-to-menu">
-          🏠 Retour au menu
+          ${t('menuBtn')}
         </button>
       </div>
     `);
@@ -59,32 +84,39 @@ const UI = {
 
   // ── Écran 3 : Choix de la difficulté ────────────────────────────────────
   showDifficulty() {
+    this._track('difficulty');
+    const t = k => I18n.t(k);
     const streak = Game.state.currentStreak;
+
     const streakBanner = streak > 0 ? `
       <div class="streak-banner">
-        ⚡ <strong>${streak} gorgée${streak > 1 ? 's' : ''}</strong> accumulée${streak > 1 ? 's' : ''} —
-        si tu rates, tu bois <strong>${streak} + la valeur de la question</strong>
+        ⚡ <strong>${I18n.sip(streak)}</strong> ${streak > 1 ? t('streakAccumN') : t('streakAccum1')} —
+        ${t('streakIfFail')} <strong>${streak} ${t('streakPlus')}</strong>
       </div>` : '';
+
+    const pts = (base) => streak > 0
+      ? `${t('inPlay')} ${I18n.sip(streak + base)}`
+      : I18n.sip(base);
 
     this.render(`
       ${streakBanner}
-      <p class="difficulty-intro">Choisissez la difficulté</p>
+      <p class="difficulty-intro">${t('chooseDiff')}</p>
 
       <div class="difficulty-grid">
         <button class="diff-card easy" data-action="select-difficulty" data-value="1">
           <span class="diff-icon">🟡</span>
-          <span class="diff-name">Facile</span>
-          <span class="diff-points">${streak > 0 ? `En jeu : ${streak + 1} gorgée${streak + 1 > 1 ? 's' : ''}` : '1 gorgée'}</span>
+          <span class="diff-name">${t('diffEasy')}</span>
+          <span class="diff-points">${pts(1)}</span>
         </button>
         <button class="diff-card medium" data-action="select-difficulty" data-value="2">
           <span class="diff-icon">🟠</span>
-          <span class="diff-name">Moyen</span>
-          <span class="diff-points">${streak > 0 ? `En jeu : ${streak + 2} gorgées` : '2 gorgées'}</span>
+          <span class="diff-name">${t('diffMedium')}</span>
+          <span class="diff-points">${pts(2)}</span>
         </button>
         <button class="diff-card hard" data-action="select-difficulty" data-value="3">
           <span class="diff-icon">🔴</span>
-          <span class="diff-name">Difficile</span>
-          <span class="diff-points">${streak > 0 ? `En jeu : ${streak + 3} gorgées` : '3 gorgées'}</span>
+          <span class="diff-name">${t('diffHard')}</span>
+          <span class="diff-points">${pts(3)}</span>
         </button>
       </div>
     `);
@@ -92,7 +124,9 @@ const UI = {
 
   // ── Écran 4 : Question ───────────────────────────────────────────────────
   showQuestion(question) {
-    const diffLabel = ['', 'Facile • 1 gorgée', 'Moyen • 2 gorgées', 'Difficile • 3 gorgées'][question.difficulty];
+    this._track('question', question);
+    const t = k => I18n.t(k);
+    const diffLabel = ['', t('diffLabel1'), t('diffLabel2'), t('diffLabel3')][question.difficulty];
     const diffClass = ['', 'badge-easy', 'badge-medium', 'badge-hard'][question.difficulty];
 
     this.render(`
@@ -107,48 +141,50 @@ const UI = {
 
       <div id="answer-zone">
         <button class="btn btn-primary" data-action="reveal">
-          👁 Révéler la réponse
+          ${t('revealBtn')}
         </button>
       </div>
     `);
   },
 
   revealAnswer(question) {
+    const t = k => I18n.t(k);
     document.getElementById('answer-zone').innerHTML = `
       <div class="answer-reveal">
         ✅ ${this._escape(question.answer)}
       </div>
       <div class="verdict-buttons">
-        <button class="btn btn-success" data-action="correct">✓ Bonne réponse</button>
-        <button class="btn btn-danger"  data-action="wrong">✗ Mauvaise réponse</button>
+        <button class="btn btn-success" data-action="correct">${t('correctBtn')}</button>
+        <button class="btn btn-danger"  data-action="wrong">${t('wrongBtn')}</button>
       </div>
     `;
   },
 
   // ── Écran 5a : Bonne réponse — décision ──────────────────────────────────
   showDecision(totalStreak) {
+    this._track('decision', totalStreak);
+    const t = k => I18n.t(k);
     const player = Game.getCurrentPlayer();
-    const g = n => `${n} gorgée${n > 1 ? 's' : ''}`;
 
     this.render(`
       <div class="result-screen">
         <div class="result-icon">🎉</div>
-        <h2>Bravo ${this._escape(player.name)} !</h2>
+        <h2>${t('bravo')} ${this._escape(player.name)} !</h2>
 
         <div class="streak-display">${totalStreak}</div>
-        <div class="streak-label">gorgée${totalStreak > 1 ? 's' : ''} accumulée${totalStreak > 1 ? 's' : ''}</div>
+        <div class="streak-label">${I18n.sip(totalStreak)} ${totalStreak > 1 ? t('streakAccumN') : t('streakAccum1')}</div>
 
         <div class="decision-section">
-          <p class="decision-hint">Que veux-tu faire ?</p>
+          <p class="decision-hint">${t('whatToDo')}</p>
 
           <button class="btn btn-gold" data-action="bank">
-            💧 Distribuer et passer
-            <small>${g(totalStreak)} à donner</small>
+            ${t('bankBtn')}
+            <small>${I18n.sip(totalStreak)} ${t('toGive')}</small>
           </button>
 
           <button class="btn btn-risk" data-action="continue">
-            🎲 Tout miser pour plus !
-            <small>Risquer ${g(totalStreak)}</small>
+            ${t('continueBtn')}
+            <small>${t('risk')} ${I18n.sip(totalStreak)}</small>
           </button>
         </div>
       </div>
@@ -157,17 +193,19 @@ const UI = {
 
   // ── Écran 5b : Mauvaise réponse — boire ──────────────────────────────────
   showDrink(amount) {
+    this._track('drink', amount);
+    const t = k => I18n.t(k);
     const player = Game.getCurrentPlayer();
     this.render(`
       <div class="result-screen drink-screen">
         <div class="result-icon">💀</div>
-        <h2>Raté !</h2>
-        <p class="drink-subtitle">${this._escape(player.name)} doit boire</p>
+        <h2>${t('missed')}</h2>
+        <p class="drink-subtitle">${this._escape(player.name)} ${t('mustDrink')}</p>
         <div class="drink-number">${amount}</div>
-        <div class="drink-label">gorgée${amount > 1 ? 's' : ''}</div>
+        <div class="drink-label">${amount > 1 ? t('sipN') : t('sip1')}</div>
 
         <button class="btn btn-primary" data-action="next-player">
-          Au suivant →
+          ${t('nextBtn')}
         </button>
       </div>
     `);
@@ -175,18 +213,20 @@ const UI = {
 
   // ── Écran 5c : Distribution confirmée ────────────────────────────────────
   showBank(amount) {
+    this._track('bank', amount);
+    const t = k => I18n.t(k);
     const player = Game.getCurrentPlayer();
     this.render(`
       <div class="result-screen bank-screen">
         <div class="result-icon">🥂</div>
-        <h2>Distribué !</h2>
-        <p>${this._escape(player.name)} distribue</p>
+        <h2>${t('distributed')}</h2>
+        <p>${this._escape(player.name)} ${t('distributes')}</p>
         <div class="drink-number gold">${amount}</div>
-        <div class="drink-label">gorgée${amount > 1 ? 's' : ''}</div>
-        <p class="bank-hint">À qui tu veux !</p>
+        <div class="drink-label">${amount > 1 ? t('sipN') : t('sip1')}</div>
+        <p class="bank-hint">${t('toWhom')}</p>
 
         <button class="btn btn-primary" data-action="next-player">
-          Au suivant →
+          ${t('nextBtn')}
         </button>
       </div>
     `);
@@ -194,6 +234,8 @@ const UI = {
 
   // ── Tableau des scores ────────────────────────────────────────────────────
   showScores() {
+    this._track('scores');
+    const t = k => I18n.t(k);
     const rows = Game.state.players.map(p => `
       <tr>
         <td class="score-name">${this._escape(p.name)}</td>
@@ -203,22 +245,22 @@ const UI = {
     `).join('');
 
     this.render(`
-      <h2>📊 Tableau des scores</h2>
-      <p class="tagline">Depuis le début de la partie</p>
+      <h2>${t('scoresTitle')}</h2>
+      <p class="tagline">${t('scoresSince')}</p>
 
       <table class="score-table">
         <thead>
           <tr>
-            <th>Joueur</th>
-            <th>Données 💧</th>
-            <th>Bues 🍺</th>
+            <th>${t('scoresPlayer')}</th>
+            <th>${t('scoresGiven')}</th>
+            <th>${t('scoresDrunk')}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
 
       <button class="btn btn-primary" data-action="back-to-turn">
-        ← Retour au jeu
+        ${t('backBtn')}
       </button>
     `);
   },
@@ -226,16 +268,17 @@ const UI = {
   // ── Modal de confirmation retour au menu ─────────────────────────────────
   showBackModal() {
     if (document.getElementById('modal-overlay')) return;
+    const t = k => I18n.t(k);
     const overlay = document.createElement('div');
     overlay.id = 'modal-overlay';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal">
         <div class="modal-icon">⚠️</div>
-        <p class="modal-title">Retour au menu</p>
-        <p class="modal-text">Les scores seront réinitialisés. Continuer ?</p>
-        <button class="btn btn-danger" data-action="confirm-menu">Oui, quitter</button>
-        <button class="btn btn-ghost" data-action="close-modal">Annuler</button>
+        <p class="modal-title">${t('modalTitle')}</p>
+        <p class="modal-text">${t('modalText')}</p>
+        <button class="btn btn-danger" data-action="confirm-menu">${t('confirmBtn')}</button>
+        <button class="btn btn-ghost" data-action="close-modal">${t('cancelBtn')}</button>
       </div>
     `;
     this.app.appendChild(overlay);
