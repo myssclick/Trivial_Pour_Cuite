@@ -173,6 +173,7 @@ const CATEGORY_TRANSLATIONS = {
   "Maths":       { en: "Maths",       es: "Matemáticas" },
   "BD":          { en: "Comics",      es: "Cómics" },
   "Animaux":     { en: "Animals",     es: "Animales" },
+  "Perso":       { en: "Personal",   es: "Personal" },
 };
 
 const FLAGS = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' };
