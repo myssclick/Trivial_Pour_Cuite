@@ -5,8 +5,6 @@
   --card-border:   #252548;
   --text:          #f0f0ff;
   --text-muted:    #8080aa;
-  --easy:          #ffd700;
-  --medium:        #ff8c00;
   --hard:          #ff4444;
   --success:       #22c55e;
   --purple:        #7c3aed;
@@ -238,13 +236,13 @@ h2 {
 
 /* ── Bannière streak (affichée sur l'écran question) ───────────────────────── */
 .streak-banner {
-  background: rgba(255, 140, 0, .12);
-  border: 1px solid var(--medium);
+  background: rgba(124, 58, 237, .1);
+  border: 1px solid var(--purple-light);
   border-radius: 10px;
   padding: .7rem 1rem;
   margin-bottom: 1rem;
   font-size: .95rem;
-  color: var(--medium);
+  color: var(--purple-light);
   text-align: center;
 }
 
@@ -264,9 +262,7 @@ h2 {
 }
 
 .badge-category { background: rgba(255,255,255,.08); color: var(--text-muted); }
-.badge-easy     { background: rgba(255,215,0,.15);   color: var(--easy); }
-.badge-medium   { background: rgba(255,140,0,.15);   color: var(--medium); }
-.badge-hard     { background: rgba(255,68,68,.15);   color: var(--hard); }
+.badge-sip      { background: rgba(124,58,237,.15);  color: var(--purple-light); }
 
 .question-card {
   background: var(--card-bg);

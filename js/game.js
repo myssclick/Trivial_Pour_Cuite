@@ -3,6 +3,7 @@ const Game = {
     players: [],              // [{ name, given, drunk }]
     currentPlayerIndex: 0,
     currentStreak: 0,         // gorgées accumulées ce tour
+    currentSipValue: 0,       // gorgées de la question en cours (aléatoire 1-3)
     currentQuestion: null,
     usedQuestionIds: new Set(),
   },
@@ -11,6 +12,7 @@ const Game = {
     this.state.players = playerNames.map(name => ({ name, given: 0, drunk: 0 }));
     this.state.currentPlayerIndex = 0;
     this.state.currentStreak = 0;
+    this.state.currentSipValue = 0;
     this.state.currentQuestion = null;
     this.state.usedQuestionIds = new Set();
   },
@@ -28,12 +30,13 @@ const Game = {
     const q = pool[Math.floor(Math.random() * pool.length)];
     this.state.usedQuestionIds.add(q.id);
     this.state.currentQuestion = q;
+    this.state.currentSipValue = Math.ceil(Math.random() * 3);
     return q;
   },
 
   // Appelé quand la réponse est bonne — renvoie le nouveau total accumulé
   answerCorrect() {
-    this.state.currentStreak += this.state.currentQuestion.difficulty;
+    this.state.currentStreak += this.state.currentSipValue;
     return this.state.currentStreak;
   },
 
@@ -48,8 +51,7 @@ const Game = {
 
   // Appelé quand la réponse est mauvaise — renvoie le nombre de gorgées à boire
   answerWrong() {
-    // Toujours : streak accumulé + valeur de la question ratée
-    const drinkAmount = this.state.currentStreak + this.state.currentQuestion.difficulty;
+    const drinkAmount = this.state.currentStreak + this.state.currentSipValue;
     this.getCurrentPlayer().drunk += drinkAmount;
     this.state.currentStreak = 0;
     this.state.currentQuestion = null;

@@ -85,20 +85,20 @@ const UI = {
     this._track('question', question);
     const t = k => I18n.t(k);
     const streak = Game.state.currentStreak;
-    const diffLabel = ['', t('diffLabel1'), t('diffLabel2'), t('diffLabel3')][question.difficulty];
-    const diffClass = ['', 'badge-easy', 'badge-medium', 'badge-hard'][question.difficulty];
+    const sipValue = Game.state.currentSipValue;
+    const totalIfFail = streak + sipValue;
 
     const streakBanner = streak > 0 ? `
       <div class="streak-banner">
         ⚡ <strong>${I18n.sip(streak)}</strong> ${streak > 1 ? t('streakAccumN') : t('streakAccum1')} —
-        ${t('streakIfFail')} <strong>${streak} ${t('streakPlus')}</strong>
+        ${t('streakIfFail')} <strong>${I18n.sip(totalIfFail)}</strong>
       </div>` : '';
 
     this.render(`
       ${streakBanner}
       <div class="question-meta">
         <span class="badge badge-category">${this._escape(I18n.category(question.category))}</span>
-        <span class="badge ${diffClass}">${diffLabel}</span>
+        <span class="badge badge-sip">🎲 ${I18n.sip(sipValue)}</span>
       </div>
 
       <div class="question-card">
