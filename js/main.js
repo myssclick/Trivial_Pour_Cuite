@@ -16,13 +16,12 @@ document.getElementById('app').addEventListener('click', e => {
   switch (action) {
     case 'set-count':      handleSetCount(parseInt(value)); break;
     case 'start':          handleStart();                   break;
-    case 'draw':           UI.showDifficulty();             break;
-    case 'select-difficulty': handleSelectDifficulty(parseInt(value)); break;
+    case 'draw':           handleDraw();                    break;
     case 'reveal':         handleReveal();                  break;
     case 'correct':        handleCorrect();                 break;
     case 'wrong':          handleWrong();                   break;
     case 'bank':           handleBank();                    break;
-    case 'continue':       UI.showDifficulty();             break;
+    case 'continue':       handleDraw();                    break;
     case 'next-player':    Game.nextPlayer(); UI.showPlayerTurn(); break;
     case 'show-scores':    UI.showScores();                 break;
     case 'back-to-turn':   UI.showPlayerTurn();             break;
@@ -65,8 +64,8 @@ function handleStart() {
   UI.showPlayerTurn();
 }
 
-function handleSelectDifficulty(difficulty) {
-  const question = Game.getQuestion(difficulty);
+function handleDraw() {
+  const question = Game.getQuestion();
   UI.showQuestion(question);
 }
 

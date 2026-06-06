@@ -19,16 +19,11 @@ const Game = {
     return this.state.players[this.state.currentPlayerIndex];
   },
 
-  getQuestion(difficulty) {
-    const pool = QUESTIONS.filter(
-      q => q.difficulty === difficulty && !this.state.usedQuestionIds.has(q.id)
-    );
-    // Si toutes les questions de cette difficulté ont déjà été posées, on réinitialise
+  getQuestion() {
+    const pool = QUESTIONS.filter(q => !this.state.usedQuestionIds.has(q.id));
     if (pool.length === 0) {
-      QUESTIONS
-        .filter(q => q.difficulty === difficulty)
-        .forEach(q => this.state.usedQuestionIds.delete(q.id));
-      return this.getQuestion(difficulty);
+      this.state.usedQuestionIds.clear();
+      return this.getQuestion();
     }
     const q = pool[Math.floor(Math.random() * pool.length)];
     this.state.usedQuestionIds.add(q.id);

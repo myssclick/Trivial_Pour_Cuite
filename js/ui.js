@@ -19,14 +19,13 @@ const UI = {
 
   rerender() {
     switch (this._screen) {
-      case 'setup':      this.showSetup();                      break;
-      case 'turn':       this.showPlayerTurn();                 break;
-      case 'difficulty': this.showDifficulty();                 break;
-      case 'question':   this.showQuestion(this._screenArg);   break;
-      case 'decision':   this.showDecision(this._screenArg);   break;
-      case 'drink':      this.showDrink(this._screenArg);      break;
-      case 'bank':       this.showBank(this._screenArg);       break;
-      case 'scores':     this.showScores();                    break;
+      case 'setup':    this.showSetup();                    break;
+      case 'turn':     this.showPlayerTurn();               break;
+      case 'question': this.showQuestion(this._screenArg); break;
+      case 'decision': this.showDecision(this._screenArg); break;
+      case 'drink':    this.showDrink(this._screenArg);    break;
+      case 'bank':     this.showBank(this._screenArg);     break;
+      case 'scores':   this.showScores();                  break;
     }
   },
 
@@ -82,11 +81,13 @@ const UI = {
     `);
   },
 
-  // ── Écran 3 : Choix de la difficulté ────────────────────────────────────
-  showDifficulty() {
-    this._track('difficulty');
+  // ── Écran 3 : Question ───────────────────────────────────────────────────
+  showQuestion(question) {
+    this._track('question', question);
     const t = k => I18n.t(k);
     const streak = Game.state.currentStreak;
+    const diffLabel = ['', t('diffLabel1'), t('diffLabel2'), t('diffLabel3')][question.difficulty];
+    const diffClass = ['', 'badge-easy', 'badge-medium', 'badge-hard'][question.difficulty];
 
     const streakBanner = streak > 0 ? `
       <div class="streak-banner">
@@ -94,44 +95,10 @@ const UI = {
         ${t('streakIfFail')} <strong>${streak} ${t('streakPlus')}</strong>
       </div>` : '';
 
-    const pts = (base) => streak > 0
-      ? `${t('inPlay')} ${I18n.sip(streak + base)}`
-      : I18n.sip(base);
-
     this.render(`
       ${streakBanner}
-      <p class="difficulty-intro">${t('chooseDiff')}</p>
-
-      <div class="difficulty-grid">
-        <button class="diff-card easy" data-action="select-difficulty" data-value="1">
-          <span class="diff-icon">🟡</span>
-          <span class="diff-name">${t('diffEasy')}</span>
-          <span class="diff-points">${pts(1)}</span>
-        </button>
-        <button class="diff-card medium" data-action="select-difficulty" data-value="2">
-          <span class="diff-icon">🟠</span>
-          <span class="diff-name">${t('diffMedium')}</span>
-          <span class="diff-points">${pts(2)}</span>
-        </button>
-        <button class="diff-card hard" data-action="select-difficulty" data-value="3">
-          <span class="diff-icon">🔴</span>
-          <span class="diff-name">${t('diffHard')}</span>
-          <span class="diff-points">${pts(3)}</span>
-        </button>
-      </div>
-    `);
-  },
-
-  // ── Écran 4 : Question ───────────────────────────────────────────────────
-  showQuestion(question) {
-    this._track('question', question);
-    const t = k => I18n.t(k);
-    const diffLabel = ['', t('diffLabel1'), t('diffLabel2'), t('diffLabel3')][question.difficulty];
-    const diffClass = ['', 'badge-easy', 'badge-medium', 'badge-hard'][question.difficulty];
-
-    this.render(`
       <div class="question-meta">
-        <span class="badge badge-category">${this._escape(question.category)}</span>
+        <span class="badge badge-category">${this._escape(I18n.category(question.category))}</span>
         <span class="badge ${diffClass}">${diffLabel}</span>
       </div>
 
