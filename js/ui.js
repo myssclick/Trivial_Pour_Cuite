@@ -41,22 +41,21 @@ const UI = {
       </div>
 
       <div class="form-section">
-        <div class="form-label">${t('playerCountLabel')}</div>
-        <div class="player-count-row">
-          ${[2, 3, 4, 5, 6, 7, 8].map(n =>
-            `<button class="count-btn ${n === 2 ? 'active' : ''}" data-action="set-count" data-value="${n}">${n}</button>`
-          ).join('')}
+        <div id="player-list" class="player-list"></div>
+
+        <div class="add-player-row">
+          <input id="new-player-input" class="player-input" placeholder="${t('addPlayerPlaceholder')}" maxlength="20" autocomplete="off" />
+          <button class="btn-add-player" data-action="add-player">${t('addPlayerBtn')}</button>
         </div>
 
-        <div id="player-inputs">
-          ${[1, 2].map(i => `
-            <input class="player-input" placeholder="${t('playerPlaceholder')} ${i}" data-player="${i}" maxlength="16" autocomplete="off" />
-          `).join('')}
-        </div>
+        <p id="min-players-hint" class="min-players-hint">${t('minPlayersHint')}</p>
 
-        <button class="btn btn-primary" data-action="start">${t('startBtn')}</button>
+        <button id="start-btn" class="btn btn-primary" data-action="start" hidden>
+          ${t('startBtn')}
+        </button>
       </div>
     `);
+    if (this.onSetupRender) this.onSetupRender();
   },
 
   // ── Écran 2 : Tour du joueur ─────────────────────────────────────────────

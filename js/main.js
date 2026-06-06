@@ -1,12 +1,14 @@
 // ── Initialisation ───────────────────────────────────────────────────────────
 UI.init();
-I18n.set(I18n.lang); // applique la langue sauvegardée
+I18n.set(I18n.lang);
 mountLangPicker();
+
+let playerList = [];
+
+UI.onSetupRender = updatePlayerListUI;
 UI.showSetup();
 
-let selectedCount = 2;
-
-// ── Délégation d'événements ───────────────────────────────────────────────────
+// ── Délégation d'événements — clic ───────────────────────────────────────────
 document.getElementById('app').addEventListener('click', e => {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
@@ -14,56 +16,81 @@ document.getElementById('app').addEventListener('click', e => {
   const value  = btn.dataset.value;
 
   switch (action) {
-    case 'set-count':      handleSetCount(parseInt(value)); break;
-    case 'start':          handleStart();                   break;
-    case 'draw':           handleDraw();                    break;
-    case 'reveal':         handleReveal();                  break;
-    case 'correct':        handleCorrect();                 break;
-    case 'wrong':          handleWrong();                   break;
-    case 'bank':           handleBank();                    break;
-    case 'continue':       handleDraw();                    break;
-    case 'next-player':    Game.nextPlayer(); UI.showPlayerTurn(); break;
-    case 'show-scores':    UI.showScores();                 break;
-    case 'back-to-turn':   UI.showPlayerTurn();             break;
-    case 'back-to-menu':   UI.showBackModal();              break;
-    case 'confirm-menu':   UI.hideModal(); UI.showSetup();  break;
-    case 'close-modal':    UI.hideModal();                  break;
+    case 'add-player':    handleAddPlayer();               break;
+    case 'remove-player': handleRemovePlayer(parseInt(value)); break;
+    case 'start':         handleStart();                   break;
+    case 'draw':          handleDraw();                    break;
+    case 'reveal':        handleReveal();                  break;
+    case 'correct':       handleCorrect();                 break;
+    case 'wrong':         handleWrong();                   break;
+    case 'bank':          handleBank();                    break;
+    case 'continue':      handleDraw();                    break;
+    case 'next-player':   Game.nextPlayer(); UI.showPlayerTurn(); break;
+    case 'show-scores':   UI.showScores();                 break;
+    case 'back-to-turn':  UI.showPlayerTurn();             break;
+    case 'back-to-menu':  UI.showBackModal();              break;
+    case 'confirm-menu':  playerList = []; UI.hideModal(); UI.showSetup(); break;
+    case 'close-modal':   UI.hideModal();                  break;
   }
 });
 
-// ── Handlers ──────────────────────────────────────────────────────────────────
-function handleSetCount(count) {
-  selectedCount = count;
+// ── Délégation d'événements — touche Entrée sur le champ joueur ──────────────
+document.getElementById('app').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'new-player-input') {
+    e.preventDefault();
+    handleAddPlayer();
+  }
+});
 
-  document.querySelectorAll('.count-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.dataset.value) === count);
-  });
+// ── Handlers setup ────────────────────────────────────────────────────────────
+function handleAddPlayer() {
+  const input = document.getElementById('new-player-input');
+  if (!input) return;
+  const name = input.value.trim();
+  if (!name) {
+    input.classList.add('input-error');
+    shakeElement(input);
+    return;
+  }
+  playerList.push(name);
+  input.value = '';
+  input.classList.remove('input-error');
+  updatePlayerListUI();
+  input.focus();
+}
 
-  const container = document.getElementById('player-inputs');
-  container.innerHTML = Array.from({ length: count }, (_, i) => `
-    <input class="player-input" placeholder="${I18n.t('playerPlaceholder')} ${i + 1}" data-player="${i + 1}" maxlength="16" autocomplete="off" />
+function handleRemovePlayer(index) {
+  playerList.splice(index, 1);
+  updatePlayerListUI();
+}
+
+function updatePlayerListUI() {
+  const listEl   = document.getElementById('player-list');
+  const startBtn = document.getElementById('start-btn');
+  const hint     = document.getElementById('min-players-hint');
+  if (!listEl) return;
+
+  listEl.innerHTML = playerList.map((name, i) => `
+    <div class="player-chip">
+      <span class="player-chip-num">${i + 1}</span>
+      <span class="player-chip-name">${UI._escape(name)}</span>
+      <button class="player-chip-remove" data-action="remove-player" data-value="${i}" aria-label="Supprimer">✕</button>
+    </div>
   `).join('');
+
+  const canStart = playerList.length >= 2;
+  if (startBtn) startBtn.hidden = !canStart;
+  if (hint)     hint.hidden     = canStart;
 }
 
 function handleStart() {
-  const inputs = document.querySelectorAll('.player-input');
-  const names = [];
-
-  for (const input of inputs) {
-    const name = input.value.trim();
-    if (!name) {
-      input.classList.add('input-error');
-      input.focus();
-      shakeElement(input);
-      return;
-    }
-    names.push(name);
-  }
-
-  Game.init(names);
+  if (playerList.length < 2) return;
+  Game.init([...playerList]);
+  playerList = [];
   UI.showPlayerTurn();
 }
 
+// ── Handlers jeu ──────────────────────────────────────────────────────────────
 function handleDraw() {
   const question = Game.getQuestion();
   UI.showQuestion(question);
@@ -123,22 +150,16 @@ function mountLangPicker() {
     const btn = e.target.closest('[data-lang]');
     if (!btn) return;
     e.stopPropagation();
-
     I18n.set(btn.dataset.lang);
     toggle.textContent = I18n.flag();
     dropdown.hidden = true;
     toggle.classList.remove('open');
-
-    // Marque la langue active
     document.querySelectorAll('.lang-option').forEach(b => {
       b.classList.toggle('active', b.dataset.lang === I18n.lang);
     });
-
-    // Re-rend l'écran courant dans la nouvelle langue
     UI.rerender();
   });
 
-  // Marque la langue initiale active
   document.querySelectorAll('.lang-option').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === I18n.lang);
   });
@@ -159,7 +180,7 @@ function shakeElement(el) {
 }
 
 document.getElementById('app').addEventListener('input', e => {
-  if (e.target.classList.contains('player-input')) {
+  if (e.target.id === 'new-player-input') {
     e.target.classList.remove('input-error');
   }
 });

@@ -83,52 +83,71 @@ h2 {
 
 .form-section { display: flex; flex-direction: column; gap: 0; }
 
-.form-label {
+/* Liste des joueurs confirmés */
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-bottom: .75rem;
+}
+
+.player-chip {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  padding: .6rem 1rem;
+  animation: fadeUp .2s ease both;
+}
+
+.player-chip-num {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--purple-light);
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.player-chip-name {
+  flex: 1;
   font-weight: 600;
-  margin-bottom: .6rem;
+  font-size: 1rem;
+}
+
+.player-chip-remove {
+  background: none;
+  border: none;
   color: var(--text-muted);
   font-size: .9rem;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-
-.player-count-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.count-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 2px solid var(--card-border);
-  background: var(--card-bg);
-  color: var(--text);
-  font-size: 1rem;
-  font-weight: 700;
   cursor: pointer;
-  transition: all .15s;
+  padding: .2rem .4rem;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  line-height: 1;
 }
 
-.count-btn:hover { border-color: var(--purple-light); }
+.player-chip-remove:hover {
+  color: var(--hard);
+  background: rgba(255, 68, 68, .1);
+}
 
-.count-btn.active {
-  background: var(--purple);
-  border-color: var(--purple);
-  color: #fff;
+/* Ligne d'ajout de joueur */
+.add-player-row {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: .6rem;
 }
 
 .player-input {
-  width: 100%;
+  flex: 1;
   padding: .85rem 1rem;
   background: var(--card-bg);
   border: 2px solid var(--card-border);
   border-radius: 12px;
   color: var(--text);
   font-size: 1rem;
-  margin-bottom: .65rem;
   transition: border-color .2s;
 }
 
@@ -139,6 +158,29 @@ h2 {
 
 .player-input.input-error {
   border-color: var(--hard);
+}
+
+.btn-add-player {
+  padding: .85rem 1.1rem;
+  background: var(--purple);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s, transform .12s;
+  white-space: nowrap;
+}
+
+.btn-add-player:hover  { filter: brightness(1.15); }
+.btn-add-player:active { transform: scale(.95); }
+
+.min-players-hint {
+  color: var(--text-muted);
+  font-size: .85rem;
+  text-align: center;
+  margin-bottom: .5rem;
 }
 
 /* ── Boutons ───────────────────────────────────────────────────────────────── */

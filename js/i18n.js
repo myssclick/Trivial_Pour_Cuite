@@ -1,16 +1,16 @@
 const TRANSLATIONS = {
   fr: {
-    // Setup
     tagline:          "Le jeu de soirée sans filtre",
     playerCountLabel: "Nombre de joueurs",
     playerPlaceholder:"Joueur",
     startBtn:         "C'est parti ! 🎉",
-    // Tour
+    addPlayerPlaceholder: "Nom du joueur...",
+    addPlayerBtn:     "Ajouter",
+    minPlayersHint:   "Ajoutez au moins 2 joueurs pour commencer",
     turnLabel:   "C'est le tour de",
     drawBtn:     "🎲 Tirer une carte",
     scoresBtn:   "📊 Tableau des scores",
     menuBtn:     "🏠 Retour au menu",
-    // Difficulté
     chooseDiff:  "Choisissez la difficulté",
     inPlay:      "En jeu :",
     diffEasy:    "Facile",
@@ -19,52 +19,46 @@ const TRANSLATIONS = {
     diffLabel1:  "Facile • 1 gorgée",
     diffLabel2:  "Moyen • 2 gorgées",
     diffLabel3:  "Difficile • 3 gorgées",
-    // Question
     revealBtn:   "👁 Révéler la réponse",
     correctBtn:  "✓ Bonne réponse",
     wrongBtn:    "✗ Mauvaise réponse",
-    // Décision
     bravo:       "Bravo",
     whatToDo:    "Que veux-tu faire ?",
     bankBtn:     "💧 Distribuer et passer",
     toGive:      "à donner",
     continueBtn: "🎲 Tout miser pour plus !",
     risk:        "Risquer",
-    // Boire
     missed:      "Raté !",
     mustDrink:   "doit boire",
     nextBtn:     "Au suivant →",
-    // Bank
     distributed: "Distribué !",
     distributes: "distribue",
     toWhom:      "À qui tu veux !",
-    // Scores
     scoresTitle:  "📊 Tableau des scores",
     scoresSince:  "Depuis le début de la partie",
     scoresPlayer: "Joueur",
     scoresGiven:  "Données 💧",
     scoresDrunk:  "Bues 🍺",
     backBtn:      "← Retour au jeu",
-    // Modal
     modalTitle:  "Retour au menu",
     modalText:   "Les scores seront réinitialisés. Continuer ?",
     confirmBtn:  "Oui, quitter",
     cancelBtn:   "Annuler",
-    // Unités
     sip1: "gorgée",
     sipN: "gorgées",
-    // Streak banner (fragments)
     streakAccum1: "accumulée",
     streakAccumN: "accumulées",
     streakIfFail: "si tu rates, tu bois",
     streakPlus:   "+ la valeur de la question",
   },
-
   en: {
     tagline:          "The party game without a filter",
     playerCountLabel: "Number of players",
     playerPlaceholder:"Player",
     startBtn:         "Let's go! 🎉",
+    addPlayerPlaceholder: "Player name...",
+    addPlayerBtn:     "Add",
+    minPlayersHint:   "Add at least 2 players to start",
     turnLabel:   "It's the turn of",
     drawBtn:     "🎲 Draw a card",
     scoresBtn:   "📊 Scoreboard",
@@ -109,12 +103,14 @@ const TRANSLATIONS = {
     streakIfFail: "if you fail, you drink",
     streakPlus:   "+ the question's value",
   },
-
   es: {
     tagline:          "El juego de fiesta sin filtro",
     playerCountLabel: "Número de jugadores",
     playerPlaceholder:"Jugador",
     startBtn:         "¡Vamos! 🎉",
+    addPlayerPlaceholder: "Nombre del jugador...",
+    addPlayerBtn:     "Añadir",
+    minPlayersHint:   "Añade al menos 2 jugadores para empezar",
     turnLabel:   "Es el turno de",
     drawBtn:     "🎲 Robar una carta",
     scoresBtn:   "📊 Marcador",
@@ -161,6 +157,24 @@ const TRANSLATIONS = {
   },
 };
 
+// Traductions des catégories (clé = nom FR)
+const CATEGORY_TRANSLATIONS = {
+  "Géographie":  { en: "Geography",   es: "Geografía" },
+  "Cinéma":      { en: "Cinema",      es: "Cine" },
+  "Science":     { en: "Science",     es: "Ciencia" },
+  "Art":         { en: "Art",         es: "Arte" },
+  "Sport":       { en: "Sport",       es: "Deporte" },
+  "Littérature": { en: "Literature",  es: "Literatura" },
+  "Musique":     { en: "Music",       es: "Música" },
+  "Nourriture":  { en: "Food",        es: "Comida" },
+  "Culture Pop": { en: "Pop Culture", es: "Cultura Pop" },
+  "Histoire":    { en: "History",     es: "Historia" },
+  "Tech":        { en: "Tech",        es: "Tecnología" },
+  "Maths":       { en: "Maths",       es: "Matemáticas" },
+  "BD":          { en: "Comics",      es: "Cómics" },
+  "Animaux":     { en: "Animals",     es: "Animales" },
+};
+
 const FLAGS = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' };
 
 const I18n = {
@@ -176,12 +190,32 @@ const I18n = {
     return (TRANSLATIONS[this.lang] || TRANSLATIONS.fr)[key] || key;
   },
 
-  // Renvoie "N gorgée(s)" dans la bonne langue
   sip(n) {
-    return `${n} ${n > 1 ? this.t('sipN') : this.t('sip1')}`;
+    return `${n} ${n > 1 ? this.t('sipN') : this.t('sip1')}`;
   },
 
-  // Renvoie le flag emoji de la langue courante
+  // Retourne le texte de la question dans la langue courante
+  qText(q) {
+    if (typeof q.question === 'object') {
+      return q.question[this.lang] || q.question.fr;
+    }
+    return q.question;
+  },
+
+  // Retourne la réponse dans la langue courante
+  qAnswer(q) {
+    if (typeof q.answer === 'object') {
+      return q.answer[this.lang] || q.answer.fr;
+    }
+    return q.answer;
+  },
+
+  // Retourne la catégorie traduite
+  category(name) {
+    if (this.lang === 'fr') return name;
+    return (CATEGORY_TRANSLATIONS[name] || {})[this.lang] || name;
+  },
+
   flag() {
     return FLAGS[this.lang] || FLAGS.fr;
   },
