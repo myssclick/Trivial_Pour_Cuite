@@ -102,7 +102,7 @@ const UI = {
       </div>
 
       <div class="question-card">
-        <div class="question-text">${this._escape(question.question)}</div>
+        <div class="question-text">${this._escape(I18n.qText(question))}</div>
       </div>
 
       <div id="answer-zone">
@@ -117,7 +117,7 @@ const UI = {
     const t = k => I18n.t(k);
     document.getElementById('answer-zone').innerHTML = `
       <div class="answer-reveal">
-        ✅ ${this._escape(question.answer)}
+        ✅ ${this._escape(I18n.qAnswer(question))}
       </div>
       <div class="verdict-buttons">
         <button class="btn btn-success" data-action="correct">${t('correctBtn')}</button>
